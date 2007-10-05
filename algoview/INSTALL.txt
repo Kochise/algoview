@@ -1,0 +1,6 @@
+Allegro library of which version is higher than 4.1.4 must be installed.
+
+1.Unix
+make
+2.Windows+Mingw32
+mingw32-make -f makefile.mgw

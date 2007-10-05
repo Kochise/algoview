@@ -1,0 +1,66 @@
+# Project: algoview
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe
+RES  = 
+OBJ  = asmparse.o common.o d_malloc.o fbox.o font_dat.o graph.o grep.o lex.o mygui.o parser.o viewer.o generic_lex.o ../../algoview-0.6d-src/algoview/rle_bmp_save.o $(RES)
+LINKOBJ  = asmparse.o common.o d_malloc.o fbox.o font_dat.o graph.o grep.o lex.o mygui.o parser.o viewer.o generic_lex.o ../../algoview-0.6d-src/algoview/rle_bmp_save.o $(RES)
+LIBS =  -L"C:/Dev-Cpp/lib" -mwindows -lalleg  
+INCS =  -I"C:/Dev-Cpp/include" 
+CXXINCS =  -I"C:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"C:/Dev-Cpp/include/c++/3.4.2/backward"  -I"C:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"C:/Dev-Cpp/include/c++/3.4.2"  -I"C:/Dev-Cpp/include" 
+BIN  = algoview.exe
+CXXFLAGS = $(CXXINCS)  
+CFLAGS = $(INCS) -g  
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before algoview.exe all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) $(LINKOBJ) -o "algoview.exe" $(LIBS)
+
+asmparse.o: asmparse.c
+	$(CC) -c asmparse.c -o asmparse.o $(CFLAGS)
+
+common.o: common.c
+	$(CC) -c common.c -o common.o $(CFLAGS)
+
+d_malloc.o: d_malloc.c
+	$(CC) -c d_malloc.c -o d_malloc.o $(CFLAGS)
+
+fbox.o: fbox.c
+	$(CC) -c fbox.c -o fbox.o $(CFLAGS)
+
+font_dat.o: font_dat.c
+	$(CC) -c font_dat.c -o font_dat.o $(CFLAGS)
+
+graph.o: graph.c
+	$(CC) -c graph.c -o graph.o $(CFLAGS)
+
+grep.o: grep.c
+	$(CC) -c grep.c -o grep.o $(CFLAGS)
+
+lex.o: lex.c
+	$(CC) -c lex.c -o lex.o $(CFLAGS)
+
+mygui.o: mygui.c
+	$(CC) -c mygui.c -o mygui.o $(CFLAGS)
+
+parser.o: parser.c
+	$(CC) -c parser.c -o parser.o $(CFLAGS)
+
+viewer.o: viewer.c
+	$(CC) -c viewer.c -o viewer.o $(CFLAGS)
+
+generic_lex.o: generic_lex.c
+	$(CC) -c generic_lex.c -o generic_lex.o $(CFLAGS)
+
+../../algoview-0.6d-src/algoview/rle_bmp_save.o: ../../algoview-0.6d-src/algoview/rle_bmp_save.c
+	$(CC) -c ../../algoview-0.6d-src/algoview/rle_bmp_save.c -o ../../algoview-0.6d-src/algoview/rle_bmp_save.o $(CFLAGS)
