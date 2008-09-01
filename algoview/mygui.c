@@ -77,7 +77,7 @@ int	_open_file(char	*path,int is_pic){
 		type=1;
 		init_parser(fp);
 		//get_token();
-		if(!stricmp(ext2,"cpp")||!stricmp(ext2,"cc") ||!stricmp(ext2,"hpp"))_is_cpp=1;
+		if(!stricmp(ext2,"cpp")||!stricmp(ext2,"cc") ||!stricmp(ext2,"hpp")||!stricmp(ext2,"h"))_is_cpp=1;
 		else	_is_cpp=0;
 		parser(_is_cpp);
 		if(else_if_found){
@@ -347,6 +347,8 @@ static	char *load_text(char *s){
 int _get_textbox_offset(char *thetext, int yoffset,int wword, int tabsize, int w);
 
 int menu_textview(){
+	   int height, bar;
+
 	char *s=load_text(filename);
 	DIALOG *d=&dlg_textview[2];
 	
@@ -362,7 +364,24 @@ int menu_textview(){
 	dlg_textview[2].dp =(void *)s;
 	dlg_textview[3].dp =(void *)filename;
 	if(cursor_box){
-		d->d2=_get_textbox_offset(d->dp,cursor_box->line,!(d->flags & D_SELECTED),8,d->w);
+		height=(d->h-8)/text_height(font);
+		 _draw_textbox(d->dp, &d->d1, 
+		       0, /* DONT DRAW anything */
+		       d->d2, !(d->flags & D_SELECTED), 8,
+		       d->x, d->y, d->w, d->h,
+		       (d->flags & D_DISABLED),
+		       0, 0, 0);
+
+	 if (d->d1 > height) {
+	    bar = 12;
+	 }
+	 else {
+	    bar = 0;
+	    d->d2 = 0;
+	 }
+
+		
+		d->d2=_get_textbox_offset(d->dp,cursor_box->line,!(d->flags & D_SELECTED),8,d->w-bar);
 		printf("display:%d\toffset %d\n",d->d2,cursor_box->line);
 		if(d->d2>0)d->d2--;
 		//printf("%d=>%d\n",cursor_box->line,d->d2);

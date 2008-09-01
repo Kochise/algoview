@@ -298,7 +298,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit26]
-FileName=..\..\algoview-0.6d-src\algoview\rle_bmp_save.c
+FileName=rle_bmp_save.c
 CompileCpp=0
 Folder=algoview
 Compile=1
