@@ -48,14 +48,15 @@ int	_open_file(char	*path,int is_pic){
 
 	if(path==NULL)
 		return	0;
-	unload();
 	if(!strcmp(path,"untitled")){
+    	unload();
 		strcpy(filename,path);
 		return 1;
 	}
 	fp=fopen(path,"rt");
 	if(fp==0){
 		printf("read failed\n");
+		alert("Warning","","read failed", "OK",0,' ',0);
 		return 0;
 	}
 	tmpfp=fopen("view.tmp","wt");
@@ -64,6 +65,7 @@ int	_open_file(char	*path,int is_pic){
 		printf("view.tmp failed\n");
 		return 0;
 	}
+	unload();
 	ext=get_ext(path);
 	ext2=str_dup(ext);
 	tolower_string(ext2);

@@ -3,13 +3,13 @@
 #define COMMON_H
 
 #include <stdio.h>
-#include <allegro.h>
+#include "allegro.h"
 #include <string.h>
 #include <math.h>
 #include "d_malloc.h"
 
 #ifndef snprintf
-//#define snprintf _snprintf
+#define snprintf _snprintf
 #endif
 
 

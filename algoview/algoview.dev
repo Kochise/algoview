@@ -7,10 +7,10 @@ Ver=1
 ObjFiles=
 Includes=
 Libs=
-PrivateResource=algoview_private.rc
+PrivateResource=
 ResourceIncludes=
 MakeIncludes=
-Compiler=-g_@@_
+Compiler=_@@_
 CppCompiler=
 Linker=-lalleg_@@_
 IsCpp=0
@@ -27,7 +27,7 @@ CustomMakefile=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=0000000000000000000000
+CompilerSettings=0000000000010000000000
 
 [Unit1]
 FileName=asmparse.c

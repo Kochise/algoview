@@ -21,7 +21,7 @@ void	__d_free__(void	*a);
 #endif
 void	init_d_malloc();
 void	close_d_malloc(int gui);
-void	*raw_malloc(size_t	n);
+void	*raw_malloc(unsigned int	n);
 void	raw_free(void	*p);
 
 #ifdef __cplusplus

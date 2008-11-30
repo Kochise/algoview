@@ -165,7 +165,8 @@ int	init_allegro_app(int w,int h,int depth,int fullscreen,int sound,BITMAP **buf
 			set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
 			allegro_message("Unable to set any graphic mode\n%s\n", allegro_error);
 			return 0;
-		}
+		} 
+  fixup_datafile(data); // 
 	//if(depth==8)
 	set_palette(default_palette);
 /*

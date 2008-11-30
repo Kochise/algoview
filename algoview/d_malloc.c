@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <malloc.h>
-#include <allegro.h>
+#include "allegro.h"
 
 extern		char * filename;
 typedef struct __header{
@@ -19,7 +19,7 @@ static	void	init_header(header *p){
 
 static header	*_alloced_list=NULL;
 
-void	*__d_malloc__(char * s,int n,char *f,size_t sz){
+void	*__d_malloc__(char * s,int n,char *f,unsigned int sz){
 	header *h,*prev,*next;
 	char	*p=(char *)malloc(sz+sizeof(header));
 	

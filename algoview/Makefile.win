@@ -5,14 +5,14 @@ CPP  = g++.exe
 CC   = gcc.exe
 WINDRES = windres.exe
 RES  = 
-OBJ  = asmparse.o common.o d_malloc.o fbox.o font_dat.o graph.o grep.o lex.o mygui.o parser.o viewer.o generic_lex.o ../../algoview-0.6d-src/algoview/rle_bmp_save.o $(RES)
-LINKOBJ  = asmparse.o common.o d_malloc.o fbox.o font_dat.o graph.o grep.o lex.o mygui.o parser.o viewer.o generic_lex.o ../../algoview-0.6d-src/algoview/rle_bmp_save.o $(RES)
+OBJ  = asmparse.o common.o d_malloc.o fbox.o font_dat.o graph.o grep.o lex.o mygui.o parser.o viewer.o generic_lex.o rle_bmp_save.o $(RES)
+LINKOBJ  = asmparse.o common.o d_malloc.o fbox.o font_dat.o graph.o grep.o lex.o mygui.o parser.o viewer.o generic_lex.o rle_bmp_save.o $(RES)
 LIBS =  -L"C:/Dev-Cpp/lib" -mwindows -lalleg  
 INCS =  -I"C:/Dev-Cpp/include" 
 CXXINCS =  -I"C:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"C:/Dev-Cpp/include/c++/3.4.2/backward"  -I"C:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"C:/Dev-Cpp/include/c++/3.4.2"  -I"C:/Dev-Cpp/include" 
 BIN  = algoview.exe
-CXXFLAGS = $(CXXINCS)  
-CFLAGS = $(INCS) -g  
+CXXFLAGS = $(CXXINCS)   -O2
+CFLAGS = $(INCS)    -O2
 RM = rm -f
 
 .PHONY: all all-before all-after clean clean-custom
@@ -62,5 +62,5 @@ viewer.o: viewer.c
 generic_lex.o: generic_lex.c
 	$(CC) -c generic_lex.c -o generic_lex.o $(CFLAGS)
 
-../../algoview-0.6d-src/algoview/rle_bmp_save.o: ../../algoview-0.6d-src/algoview/rle_bmp_save.c
-	$(CC) -c ../../algoview-0.6d-src/algoview/rle_bmp_save.c -o ../../algoview-0.6d-src/algoview/rle_bmp_save.o $(CFLAGS)
+rle_bmp_save.o: rle_bmp_save.c
+	$(CC) -c rle_bmp_save.c -o rle_bmp_save.o $(CFLAGS)

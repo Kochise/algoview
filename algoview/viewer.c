@@ -56,11 +56,13 @@ BITMAP *buf;
 int font_width=11,font_height=20,box_width; 
 int is_quit,position_updated;
 int menu_mouse_x,menu_mouse_y;
-MENU	navigation_menu[7];
+MENU	navigation_menu[10];
 fbox	*current_box,*cursor_box;
 static int	sx,sy,sx_read,sy_read;
 static	undo_type	xy_queue[512];
 static	queue_header xy_queue_header;
+static	undo_type	history_queue[512];
+static	queue_header history_queue_header;
 string_array	*search_string_list;
 int	n_search_string_list;
 
@@ -641,6 +643,7 @@ int	navigation_go_next(){
 	return	1;	
 }
 
+void	_remember_current_xy(int undo,int history);
 
 
 char *undo_list_getter(int index, int *list_size){
@@ -673,6 +676,8 @@ DIALOG dlg_undo_list[] =
    { NULL,              0,   0,  0,   0,   0,   0,     0,    0,      0,   0,   NULL,         NULL, NULL }
 };
 */
+void	copy_undo_type(undo_type *s,undo_type *d);
+void	add_undo_type_queue(undo_type *s,queue_header *h,undo_type *q);
 
 DIALOG dlg_undo_list[] =
 {
@@ -726,6 +731,97 @@ int	do_undo_list(){
 	sx=xy_queue[i].x;
 	sy=xy_queue[i].y;
 	current_box=0;
+	add_undo_type_queue(&xy_queue[i],&history_queue_header,history_queue)
+	;
+	
+	return	1;
+}
+
+
+char *history_list_getter(int index, int *list_size){
+	static	char s[128],*p;
+	int	i;
+	
+	if (index < 0) {
+		*list_size = history_queue_header.length;
+		return NULL;
+	}
+   else{
+		i=get_offset_from_tail(&history_queue_header,index);
+		p=history_queue[i].s;
+		if(p)
+			snprintf(s,sizeof(s)-1,"%s : %s",p,get_filename(history_queue[i].file->s));
+		else 
+			snprintf(s,sizeof(s)-1,"(%d,%d): %s",history_queue[i].x,history_queue[i].y,get_filename(history_queue[i].file->s));
+
+		return s; 
+	}
+}
+
+/*
+DIALOG dlg_undo_list[] =
+{
+   {d_shadow_box_proc, 64,  24, 368, 448, 0,   65535, 0,    0,      0,   0,   NULL,         NULL, NULL },
+   { d_list_proc,       76,  72, 344, 388, 0,   65535, 0,    D_EXIT,      0,   0,   undo_list_getter, NULL, NULL },
+   { d_text_proc,       76,  32, 160, 32,  0,   65535, 0,    0,      0,   0,   "Undo list",  NULL, NULL },
+   { d_button_proc,     248, 32, 168, 32,  0,   65535, 0,    D_EXIT,      0,   0,   "CANCEL",     NULL, NULL },
+   { NULL,              0,   0,  0,   0,   0,   0,     0,    0,      0,   0,   NULL,         NULL, NULL }
+};
+*/
+
+DIALOG dlg_history_list[] =
+{
+   /* (proc)            (x)  (y) (w)  (h)  (fg) (bg)   (key) (flags) (d1) (d2) (dp)              (dp2) (dp3) */
+   { d_shadow_box_proc, 24,  24, 596, 448, 0,   65535, 0,    0,      0,   0,   NULL,             NULL, NULL },
+   { d_list_proc,       36,  72, 568, 388, 0,   65535, 0,    D_EXIT, 0,   0,   history_list_getter, NULL, NULL },
+   { d_text_proc,       36,  32, 160, 32,  0,   65535, 0,    0,      0,   0,   "history list",      NULL, NULL },
+   { d_button_proc,     204, 32, 396, 32,  0,   65535, 0,    D_EXIT, 0,   0,   "CANCEL",         NULL, NULL },
+   { NULL,              0,   0,  0,   0,   0,   0,     0,    0,      0,   0,   NULL,             NULL, NULL }
+};
+
+int	do_history_list(){
+	int	r,i,j,i2;
+	
+	/*
+	j=queue_prev(&xy_queue_header,xy_queue_header.current);
+	//printf("c:%d l:%d\n",xy_queue_header.current,xy_queue_header.length);
+	//j=xy_queue_header.current;
+	for(i=0;i<xy_queue_header.length;i++){
+		if(j==get_offset_from_tail(&xy_queue_header,i)){
+			dlg_undo_list[1].d1=i;
+			break;
+		}
+	}    */
+	
+	for(i=history_queue_header.head,j=0;;j++){
+		if(history_queue_header.current==i)break;
+		i=queue_next(&history_queue_header,i);
+	}
+	j=history_queue_header.length-j;
+	if(j<0)
+		j=0;
+	dlg_history_list[1].d1=j;
+	centre_dialog(dlg_history_list);
+	r=do_dialog2(dlg_history_list,1);
+	if(! (r==1))
+		return	1;
+	j=dlg_history_list[1].d1;
+	//printf("%d\n",i,);
+	i=get_offset_from_tail(&history_queue_header,j);
+	//i=dlg_find_name[3].d1;
+//	if(strcmp(xy_queue[i].s))
+	//printf("redo %d\n",xy_queue_header.current);
+	i2=get_offset_from_tail(&history_queue_header,j-1);
+	history_queue_header.current=i2;
+	if(strcmp(history_queue[i].file->s,filename)){
+		open_file(history_queue[i].file->s);
+	}
+	sx=history_queue[i].x;
+	sy=history_queue[i].y;
+	current_box=0;
+	add_undo_type_queue(&history_queue[i],&xy_queue_header,xy_queue)
+	;
+
 	
 	return	1;
 }
@@ -1558,6 +1654,7 @@ void do_navigation_menu(){
 	set_menu_item(&navigation_menu[i++],"undo",navigation_go_prev,NULL,0,NULL);
 	set_menu_item(&navigation_menu[i++],"redo",navigation_go_next,NULL,0,NULL);
 	set_menu_item(&navigation_menu[i++],"undo list",do_undo_list,NULL,0,NULL);
+	set_menu_item(&navigation_menu[i++],"history list",do_history_list,NULL,0,NULL);
 	set_menu_item(&navigation_menu[i++],"grep result",do_opened_grep,NULL,0,NULL);
 	set_menu_item(&navigation_menu[i++],NULL,NULL,NULL,0,NULL);
 	poll_mouse();
@@ -1590,46 +1687,89 @@ filename_type	*search_undo_file_name(filename_type_list *l,char *s){
 	return	NULL;
 }
 
-
-void	remember_current_xy(){
-	int i,r;
+int
+set_current_undo_info(undo_type *p){
 	fbox	*f;
 	filename_type	*fn;
 	
-	if(xy_queue_header.head!=xy_queue_header.current){
-		i=queue_prev(&xy_queue_header,xy_queue_header.current);
-		if(sx!=xy_queue[i].x ||	sy!=xy_queue[i].y || !compare_filename(filename,xy_queue[i].file->s))
-			r=1;
-		else
-			r=0;
-	}else
-		r=1;
-	if(!r)
-		return;
-	i=add_queue(&xy_queue_header);
-	xy_queue[i].x=sx;
-	xy_queue[i].y=sy;
+	p->x=sx;
+	p->y=sy;
 	f=get_current_function(sy+mouse_y);
-	if(xy_queue[i].s){
-		free(xy_queue[i].s);
-		if(--xy_queue[i].file->cnt<=0){
-			free(xy_queue[i].file->s);
-			_delete_filename_type_list(&undo_filename_list,xy_queue[i].file,NULL);
+	if(p->s){
+		free(p->s);
+		if(--p->file->cnt<=0){
+			free(p->file->s);
+			_delete_filename_type_list(&undo_filename_list,p->file,NULL);
 		}
 	}
 	if(f)
-		xy_queue[i].s=str_n_dup(f->s,32);
+		p->s=str_n_dup(f->s,32);
 	else
-		xy_queue[i].s=NULL;
+		p->s=NULL;
 	fn=search_undo_file_name(&undo_filename_list,filename);
 	if(!fn){
 		fn=new_filename_type();
 		fn->s=str_dup(filename);
 		_insert_filename_type_list(&undo_filename_list,NULL,fn);
 	}
-	xy_queue[i].file=fn;
-	xy_queue[i].file->cnt++;
-	//printf("new %d x:%d y:%d\n",i,sx,sy);
+	p->file=fn;
+	p->file->cnt++;
+	return 1;
+}
+
+void	copy_undo_type(undo_type *s,undo_type *d){
+	*d=*s;
+	d->file->cnt++;
+	if(s->s)
+		d->s=str_dup(s->s);
+	else
+		d->s=NULL;
+}
+
+void	add_undo_type_queue(undo_type *s,queue_header *h,undo_type *q){
+	int i,r,j,k;
+	fbox	*f;
+	filename_type	*fn;
+	int x,y;
+	
+	if(h->head!=h->current){
+		i=queue_prev(h,h->current);
+		if(s == NULL){
+			x=sx;y=sy;
+		}else{
+			x=s->x;y=s->y;				
+		}
+		if(x!=q[i].x ||	y!=q[i].y 
+		|| !compare_filename(filename,q[i].file->s))
+			r=1;
+		else
+			r=0;
+	}else
+		r=1;
+	if(r){
+		j=add_queue(h);
+		if(s){
+			copy_undo_type(s,&q[j]);
+		}else{
+			set_current_undo_info(&q[j]);
+		}
+	}
+}
+
+void	_remember_current_xy(int undo,int history){
+	
+	if(undo){
+		add_undo_type_queue(0,&xy_queue_header,xy_queue);
+	}
+	
+	if(history){
+		add_undo_type_queue(0,&history_queue_header,history_queue);
+	}
+		//printf("new %d x:%d y:%d\n",i,sx,sy);
+}
+
+void	remember_current_xy(){
+	_remember_current_xy(1,1);
 }
 
 int	menu_auto_find_function(){
@@ -1759,6 +1899,11 @@ void	init_undo(){
 		xy_queue[i].s=NULL;
 		xy_queue[i].file=NULL;
 	}
+	init_queue(&history_queue_header,sizeof(history_queue)/sizeof(*history_queue));
+	for(i=0;i<NELEM(history_queue);i++){
+		history_queue[i].s=NULL;
+		history_queue[i].file=NULL;
+	}
 }
 
 void	free_filename_type_contents(filename_type *p){
@@ -1771,6 +1916,9 @@ void	close_undo(){
 	
 	for(i=0;i<NELEM(xy_queue);i++){
 		if(xy_queue[i].s)free(xy_queue[i].s);
+	}
+	for(i=0;i<NELEM(history_queue);i++){
+		if(history_queue[i].s)free(history_queue[i].s);
 	}
 	_destroy_filename_type_list(&undo_filename_list,free_filename_type_contents);
 }
@@ -2161,6 +2309,40 @@ typedef struct{
 		xy_queue_header.current=config_yyval;
 		config_get_token(fp);
 	}
+	if(config_yytype=='@'){
+		config_get_token(fp);
+	for(;;){
+		if(config_yytype!=LEX_STRING)
+			break;
+		i=add_queue(&history_queue_header);
+		history_queue [i] .s=str_dup(config_yytext);
+		config_get_token(fp);
+		if(config_yytype!=LEX_STRING)
+			break;
+		fn=search_undo_file_name(&undo_filename_list,config_yytext);
+		if(!fn){
+			fn=new_filename_type();
+			fn->s=str_dup(config_yytext);
+			_insert_filename_type_list(&undo_filename_list,NULL,fn);
+		}
+		history_queue[i].file=fn;
+		history_queue[i].file->cnt++;
+		config_get_token(fp);
+		if(config_yytype!=LEX_INT)
+			break;
+		history_queue[i].x=config_yyval;
+		config_get_token(fp);
+		if(config_yytype!=LEX_INT)
+			break;
+		history_queue[i].y=config_yyval;
+		config_get_token(fp);/*
+		printf("\"%s\" \"%s\"  %d %d\n",xy_queue[i].s,xy_queue[i].file->s,xy_queue[i].x,xy_queue[i].y);
+	*/}
+	if(config_yytype==LEX_INT){
+		history_queue_header.current=config_yyval;
+		config_get_token(fp);
+	}
+	}
 	if(search_history==NULL)
 		search_history=   new_str_list ();
 	for(;;){
@@ -2259,7 +2441,26 @@ void	write_project(char *file_name){
 	if(i==xy_queue_header.current)
 		c=j;
 	fprintf(fp,"%d\n",c);
+
 	printf("cr:%d\n",xy_queue_header.current);
+
+	fprintf(fp,"@\n");
+	for(i=history_queue_header.head,j=0;i!=history_queue_header.tail;j++){
+		if(i==history_queue_header.current)
+			c=j;
+		if(!history_queue[i].s)
+			fprintf(fp,"\"(NULL)\" ");
+		else{	
+			fprintf(fp,"\"%s\" ",t=get_c_string(history_queue[i].s));
+			free(t);
+		}
+		fprintf(fp,"\"%s\"  %d %d\n",t=get_c_string(history_queue[i].file->s),history_queue[i].x,history_queue[i].y);
+		free(t);
+		i=queue_next(&history_queue_header,i);
+	}
+	if(i==history_queue_header.current)
+		c=j;
+	fprintf(fp,"%d\n",c);
 	
 	if(search_history)	
 	for(a= search_history->head;a;a=a->next){		
