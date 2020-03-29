@@ -1,6 +1,8 @@
+# ALGOrithm VIEWer by Rhee J.D.
+
 http://web.archive.org/web/20111219100619/http://sourceforge.net/projects/algoview/files/algoview/current/
 
-If it happens you have older/newer releases, please provide (fork, commit, push, pull request).
+If it happens you have older/newer releases, please provide (fork, add, commit, push, pull request).
 
 Obviously rhee defaced his algoview project following the Sourgeforge/GIMP scandal in 2013.
 
