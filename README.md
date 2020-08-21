@@ -1,5 +1,8 @@
 # ALGOrithm VIEWer by Rhee J.D.
 
+![algoview](https://raw.githubusercontent.com/Kochise/algoview/master/screenshot.jpg)
+
+http://algoview.sourceforge.net/<br>
 http://web.archive.org/web/20111219100619/http://sourceforge.net/projects/algoview/files/algoview/current/
 
 If it happens you have older/newer releases, please provide (fork, add, commit, push, pull request).
